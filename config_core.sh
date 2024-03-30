@@ -197,3 +197,4 @@ reboot
 # @REM # ChallengeResponseAuthentication no
 # @REM # PermitRootLogin no
 # @REM # Luego configurar fail2ban
+# denegar puerto 22 ssh
