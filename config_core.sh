@@ -56,11 +56,8 @@ echo "${{ SSH_USER }}:${{ SSH_USER_PASSWORD }}" | chpasswd
 # Creamos el usuario administrador de docker
 adduser ${{ USER_DOCKER }}
 usermod -aG docker ${{ USER_DOCKER }}
-git clone https://github.com/kike28/app-docker-server.git
-          
-mv app-docker-server/core/ /opt/
-
-
+git clone https://github.com/Jeffer-UAO/treafy-portainer-conf.git          
+mv treafy-portainer-conf/core/ /opt/
 
 # Crear directorios para config ssh
 mkdir -p /home/ssheasy/.ssh
@@ -84,7 +81,22 @@ echo "$public_key" >> /home/ssheasy/.ssh/authorized_keys
 
 
 # Instalar Lynis y antimalware 
-apt install -y lynis nginx supervisor python3.10 python3-pip cron chkrootkit
+apt install -y lynis nginx supervisor python3.10 python3-pip cron chkrootkit apache2-utils
+
+# Configurar el treafy
+sed -i 's/email: tucorreo@mail.com/email: '${{ EMAIL_TRAEFY }}'/' /opt/core/traefik-data/traefik.yml
+
+contrasenaTraefikfinal=$(htpasswd -nb ${{ TRAEFY_USER }} ${{ TRAEFY_PASSWORD }})
+#echo $contrasenaTraefikfinal
+
+#CAMBIAR PERMISO DE
+ chmod 600 /opt/core/traefik-data/acme.json
+
+#AGREGAR contrasena en el archivo dynamic.yml
+contrasenaDefaulttraefik='enriqueta:$apr1$ZeOc\/mrN$KTGGyWGpp3\/1vPzhBu3as1'
+sed -i 's#'$contrasenaDefaulttraefik'#'$contrasenaTraefikfinal'#' /opt/core/traefik-data/configurations/dynamic.yml
+
+chown ${{ USER_DOCKER }}:${{ USER_DOCKER }} -R /opt/core/
 
 echo "Configuración completa. Reiniciando el servidor para aplicar todos los cambios..."
 ufw --force enable
